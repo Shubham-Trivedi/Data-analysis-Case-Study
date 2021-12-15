@@ -1,0 +1,158 @@
+---
+title: "Data Analysis Case study: How Can a Wellness Technology Company Play It Smart?"
+output: html_document
+---
+<font size = "4">
+
+## Loading libraries  
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(readr)
+```
+
+## Importing needed CSV files
+For First analysis here i have chosen two csv files from the data set which are for activity data and sleep data.
+
+```{r message=FALSE, warning=FALSE}
+Activity <- read.csv('C:/Users/LENOVO/Desktop/Case Study_How a wellness company play it smart(Bellabeat)/Fitabase Data 4.12.16-5.12.16/Selected_For_case_study_V.1/dailyActivity_merged_v.2.csv')
+SleepDay <- read.csv("C:/Users/LENOVO/Desktop/Case Study_How a wellness company play it smart(Bellabeat)/Fitabase Data 4.12.16-5.12.16/Selected_For_case_study_V.1/sleepDay_merged_v.2.csv")
+```
+
+## Exploring files
+Now, that  we have imported necessary csv files let's get summary of data via multiple functions that R provides.
+```{r message=FALSE, warning=FALSE}
+head(Activity)
+head(SleepDay)
+n_distinct(Activity)
+summary(Activity)
+n_distinct(SleepDay)
+glimpse(SleepDay)
+nrow(SleepDay)
+nrow(Activity)
+```
+
+So, As we see there are 410 distinct Records in SleepDay data frame and 862 distinct records in Activity data frame.This observation is very essential to spot any duplicated record from skewing our analysis results.
+
+## Categorizing Participates  
+
+Categorizing participator's TotalMinutesAsleep into a data frame named status which shows the sleep time which indicate their Sleep Status
+
+```{r message=FALSE, warning=FALSE}
+attach(SleepDay)
+
+Status <- cut(TotalMinutesAsleep,breaks=c(0,200,350,500,800),labels = c("Critical","Very less","Adequate","More than Enough"))
+ggplot(data = Activity,mapping = aes(x=TotalDistance,y=Calories))+geom_point(colour = "Blue")+geom_smooth(colour = " Yellow ")
+```
+
+
+There is direct Corrolation between Total Distance a preson walks to calories he will burn during his Session
+
+
+```{r message=FALSE, warning=FALSE}
+ggplot(data = SleepDay)+geom_point(mapping = aes(x=TotalMinutesAsleep,y = TotalTimeInBed,colour = Status))+geom_smooth(mapping = aes(x=TotalMinutesAsleep,y = TotalTimeInBed))
+```
+
+It is evident that people who are more in bed tend to be sleeping less proportionally and they get distracted from sleep doing other activities
+
+## Reverting the Search-FLow 
+
+Detaching the Data frame as the search path  by default was changes when we used attach() function but that change should not be permitted to persist,thus for that we use detach("")
+
+```{r message=FALSE, warning=FALSE}
+detach("SleepDay")
+SleepDay <- mutate(SleepDay,Hours = TotalMinutesAsleep / 60)
+
+```
+
+
+## Analysizing if there is relation between calories burned ,Total steps and sendentary minutes
+```{r message=FALSE, warning=FALSE}
+attach(Activity)
+attach(SleepDay)
+
+Status_1 <- cut(Calories,breaks=5,labels = c("level_1","level_2","level_3","level_4","level_5"))
+ggplot(data = Activity,mapping = aes(x=SedentaryMinutes,y=Calories,colour = Status_1))+geom_point()+geom_smooth()## there is a relationship
+
+```
+
+This visualization shows four different types of people, based on their body type, which can be described in this situation as burning calories respect to sedentary lifestyle
+
+```{r message=FALSE, warning=FALSE}
+Status_2 <- cut(TotalSteps,breaks=5,labels = c("level_1","level_2","level_3","level_4","level_5"))
+ggplot(data = Activity,mapping = aes(x=SedentaryMinutes,y=TotalDistance,colour = Status_2))+geom_point() + geom_smooth()##There is no relationship to explore here
+
+
+```
+
+We can gather from above scatter plot that people are more likely to be sedentary for more than 500 minutes per day and also that there is no direct relation between sedentary time to Total distance they cover daily.for majority of people everyday the maximum distance was up-to 10 kilometers and and levels suggest different group of people divided based on their Sedentary Minutes and Total Distance they covered. 
+
+## Combining SleepDay and dailyActivity files
+```{r message=FALSE, warning=FALSE}
+combined_data <- merge(SleepDay, Activity, by="Id")
+n_distinct(combined_data$Id)  
+
+```
+
+There was use of inner join in the merge function by default so there are fewer Ids left than it was in Activity data frame.This has happened because both csv files didn't had equal number of participate IDs which should be resolved as there can be many NULL values in merged data frame if the records of Ids from Activity data frame that are not present in SleepDay data frame, permitted to exist
+
+## Analyzing if there is relationship between sleep time and total steps.
+```{r message=FALSE, warning=FALSE}
+
+ggplot(data = combined_data,mapping = aes(x=Hours,y=TotalSteps))+geom_point() + geom_smooth() ##There is relation that there are logs suggesting that at times when sleep time was between 5 to 9 there was goal task achievement of 10000 steps. 
+
+detach(Activity)
+detach(SleepDay)
+
+```
+
+We can conclude that large chunk of people who sleeps 5 to 10 hours a day are getting To the threshold of 10000 steps recommended by many Health Experts.Also, as sleep time inceases people are getting more and more in Active in their Activities which can be seen by Trend line suggesting relative downward trend from 6 hour mark.But as sample size is too small we can't generalize this finding but this is to be true only for these 24 participates.
+
+## Combining Hourly Data of steps intensities and calories
+```{r message=FALSE, warning=FALSE}
+hourlySteps <- read.csv('C:/Users/LENOVO/Desktop/Case Study_How a wellness company play it smart(Bellabeat)/Fitabase Data 4.12.16-5.12.16/Selected_For_case_study_V.1/hourlySteps_v.2.csv')
+hourlyCalories <- read.csv('C:/Users/LENOVO/Desktop/Case Study_How a wellness company play it smart(Bellabeat)/Fitabase Data 4.12.16-5.12.16/Selected_For_case_study_V.1/hourlyCalories_v.2.csv')
+hourlyIntensities <- read.csv('C:/Users/LENOVO/Desktop/Case Study_How a wellness company play it smart(Bellabeat)/Fitabase Data 4.12.16-5.12.16/Selected_For_case_study_V.1/hourlyIntensities_v.2.csv')
+```
+
+
+```{r message=FALSE, warning=FALSE}
+ggplot(data = hourlySteps) + geom_col(mapping = aes(y=StepTotal,x=ActivityHour))
+```
+
+There is relation that this group of participants walked more steps during period of 8:00 to 19:00 and After 19:00 there is steep fall in walked steps which suggest this group is in rest stage of the day.
+
+```{r message=FALSE, warning=FALSE}
+ggplot(data = hourlyCalories) + geom_col(mapping = aes(y=Calories,x=ActivityHour))
+```
+
+highest calorific burn can be seen at 18:00 which suggests that max steps walked in evening walks
+
+```{r message=FALSE, warning=FALSE}
+ggplot(data = hourlyIntensities) + geom_col(mapping = aes(y=TotalIntensity,x=ActivityHour))
+
+```
+
+this shows that people were able to apply more intensity from 5 to 7 in the evening
+
+<font size = "4">These are some other relations that i liked to show, which is for Activity Log According to Time of the day.</font>
+
+
+## Recommendations for the Stakeholders
+
+<font size = "3">
+<b>
+<i>
+1.Based on the activity levels and amount of calories burned, users appear to burn more calories with more exercise which in turn will help them become leaner and lead a healthy life. so For that, Bellabeat can motivate users to exercise more through reminders and tips or insights to staying motivated. They could also offer app dashboard for Activity they have logged and a leader-board in which there will be option for users to compete with their connections which will be fueled by ranking system.Also, company can give points according to steps the user have walked which can then used by user to get discounted items from the company's website.
+
+2.The data suggests majority of user live either a light or sedentary lifestyle, which may be due to lack of motivation Thus there can be a feature of push notifications which daily sends motivational quotes to the user.As there is lacking motivation user should be positively reinforced when they complete certain threshold of activity that will encourage user psychologically.
+
+3.To promote better sleep habits, Bellabeat may combine reminders with an app that informs users the best time to go to bed and wake up so they can feel refreshed in the morning and get enough sleep which will lead to better performance throughout the day and they will not feel burned out when trying to complete their Daily step count.
+
+4.There is dire need of larger sample size in order to improve Credibility of the analysis.
+
+5.There is need to acquire current data in order to better reflect current consumer behavior or trends in smart device usage.Collect data from internal sources to increase credibility and reliability of the data sets which will produce accurate analysis regularly and also give insights into the changing behavior patterns of the customers and that will answer the question of In what ways that particular group of people can be attracted towards our product/service by incorporating Cluster analysis.
+</i>
+</b>
+</font>
+</font>
