@@ -18,6 +18,7 @@ the use of Google’s Big-Query using SQL.
 ● I have also made visual by use of Tableau which is an extra task as i have provided
 that using R programming.It is done only for show casing my ability to work with
 Tableau.
+My Tableau Profile:-"https://public.tableau.com/app/profile/shubham3849"
 
 ● Lastly, there is statistical analysis and visualization by the use of the R programming
 language.And RMarkdown file is knitted as Html doc as i have included that in my repository.
