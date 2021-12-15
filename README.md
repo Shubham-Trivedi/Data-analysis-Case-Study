@@ -20,7 +20,7 @@ that using R programming.It is done only for show casing my ability to work with
 Tableau.
 
 ● Lastly, there is statistical analysis and visualization by the use of the R programming
-language.
+language.And RMarkdown file is knitted as Html doc as i have included that in my repository.
 
 This is a comprehensive case study following six phases of data analysis cycle which are
 ASK, PREPARE, PROCESS, ANALYZE, SHARE and ACT.In this case study I have included
